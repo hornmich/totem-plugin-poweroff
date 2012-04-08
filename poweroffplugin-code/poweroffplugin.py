@@ -15,6 +15,9 @@ from xml.sax.saxutils import escape
 class poweroffplugin(totem.Plugin):
     def __init__(self):
         totem.Plugin.__init__(self)
+	self.responseLock = threading.Lock()
+	self.dialogResponse = gtk.RESPONSE_NONE
+	self.dialog = 0
     def activate(self, totem_object):
         self.builder = self.load_interface("poweroffplugin.ui", True, totem_object.get_main_window(), self)
 	self.container = self.builder.get_object('container')
@@ -41,15 +44,58 @@ class poweroffplugin(totem.Plugin):
 	pid = subprocess.Popen('dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).pid
     def suspend(self):
 	pid = subprocess.Popen('dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).pid
+
+    def timer(self, delay, command):
+	start = time.time();
+
+	while time.time()-start < delay :
+	    self.responseLock.acquire()
+	    print "timer: zamknul"
+	    try:
+		if self.dialogResponse == gtk.RESPONSE_REJECT:
+			print "cancel, return"
+			return
+		elif self.dialogResponse == gtk.RESPONSE_ACCEPT:
+			print "OK - print - return"
+			print command
+			return
+  	    finally:
+		print "timer: odemyka"
+		self.responseLock.release()		
+	    continue
+	print command
+	self.dialog.destroy()
+
+
     def goButtonClicked(self, *args):
 	if self.radioDoNothing.get_active() == True :
-		print "Doing nothing\n"
+		text = "Doing nothing\n"
+		return
 	elif self.radioSuspend.get_active() == True :
-		print "Suspending\n"
+		text =  "suspend\n"
+		command = 'dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend'
 	elif self.radioPowerOff.get_active() == True :
-		print "Power off\n"
+		text =  "power off\n"
+		command = 'dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop'
 	else :
-		print "error\n"
-	
+		text =  "error\n"
+		return
 
+	label = gtk.Label("Computer is going to "+text+" in 30 seconds.")
+	timerThread = threading.Thread(target=self.timer, args=(5, command))
+	self.responseLock = threading.Lock()
+	self.dialogResponse = gtk.RESPONSE_NONE
+	timerThread.start()
+
+	self.dialog = gtk.Dialog("Performing action"+text, None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+	self.dialog.vbox.pack_start(label)
+	label.show()
+	response = self.dialog.run()
+	self.responseLock.acquire()
+	try:
+		self.dialogResponse = response
+	finally:
+		self.responseLock.release()
+	self.dialog.destroy()
+    
         
