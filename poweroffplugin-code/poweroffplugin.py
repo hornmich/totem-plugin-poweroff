@@ -31,6 +31,9 @@ class poweroffplugin(totem.Plugin):
         self.entrySuspend = self.builder.get_object('entrySuspend')
 	self.goButton = self.builder.get_object('go_button')
 	self.goButton.connect('clicked', self.goButtonClicked)
+	self.baconWidget = totem_object.get_video_widget()
+	self.totem_object = totem_object
+	self.baconWidget.connect('eos', self.eosHandler)
         
         self.totem = totem_object
         self.container.show_all();
@@ -50,17 +53,13 @@ class poweroffplugin(totem.Plugin):
 
 	while time.time()-start < delay :
 	    self.responseLock.acquire()
-	    print "timer: zamknul"
 	    try:
 		if self.dialogResponse == gtk.RESPONSE_REJECT:
-			print "cancel, return"
 			return
 		elif self.dialogResponse == gtk.RESPONSE_ACCEPT:
-			print "OK - print - return"
 			print command
 			return
   	    finally:
-		print "timer: odemyka"
 		self.responseLock.release()		
 	    continue
 	print command
@@ -97,5 +96,7 @@ class poweroffplugin(totem.Plugin):
 	finally:
 		self.responseLock.release()
 	self.dialog.destroy()
-    
-        
+    def eosHandler(self, *args):
+	print("end of stream reached.\n")
+	if self.totem_object.get_playlist_pos() == 0 :
+		print("nothing left to play -> doing action.\n")
