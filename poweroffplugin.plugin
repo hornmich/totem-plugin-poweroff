@@ -1,9 +1,9 @@
-[Totem Plugin]
+[Plugin]
 Loader=python
 Module=poweroffplugin
 IAge=1
 Name=Power Off Plugin
 Description=Plugin for automatic power off or suspend computer after the end of playback.
 Authors=Michal Horn <hornmich@fel.cvut.cz
-Copyright=Copyright © 2012 Michal Horn
+Copyright=Copyright © 2013 Michal Horn
 Website=https://sourceforge.net/p/poweroffplugin
