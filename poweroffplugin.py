@@ -38,6 +38,7 @@ from gi.repository import Peas
 from gi.repository import Totem
 import threading
 import subprocess
+import gettext
 
 """
 	Constants for Radio Buttons activities
@@ -45,6 +46,9 @@ import subprocess
 SUSPEND = 0
 TURNOFF = 1
 NOTHING = 2
+
+t = gettext.translation('poweroffplugin', '/usr/share/locale')
+_ = t.lgettext
 
 """
 	Class for maintaining Totem side panel for this plugin.
@@ -54,10 +58,10 @@ class SidePanel():
 	def __init__(self):
 		self._buttons = []
 		self._widget = Gtk.VBox(False, 1)
-		self._caption = Gtk.Label("After the end of playback:")	
-		self._buttons.append(Gtk.RadioButton("Suspend computer"))
-		self._buttons.append(Gtk.RadioButton.new_with_label_from_widget(self._buttons[0], "Turn off computer"))
-		self._buttons.append(Gtk.RadioButton.new_with_label_from_widget(self._buttons[0], "Do nothing"))
+		self._caption = Gtk.Label(_("After the end of playback:"))	
+		self._buttons.append(Gtk.RadioButton(_("Suspend computer")))
+		self._buttons.append(Gtk.RadioButton.new_with_label_from_widget(self._buttons[0], _("Turn off computer")))
+		self._buttons.append(Gtk.RadioButton.new_with_label_from_widget(self._buttons[0], _("Do nothing")))
 		self._widget.pack_start(self._caption, False, False, 0)
 		self._widget.pack_start(self._buttons[0], False, False, 0)
 		self._widget.pack_start(self._buttons[1], False, False, 0)
@@ -91,12 +95,12 @@ class SidePanel():
 """
 class TimeDialog():
 	def __init__(self, text, time):
-		self._label = Gtk.Label("Computer is going to "+text+" in "+str(time)+" seconds.")
+		self._label = Gtk.Label(_("Computer is going to ")+text+_(" in ")+str(time)+_(" seconds."))
 		self._timerThread = threading.Thread(target=self.timer, args=(time, 0))
 		self._dialogLock = threading.Lock()
 		self._dialogEnd = threading.Condition(self._dialogLock)
 		self._dialogResponse = Gtk.ResponseType.NONE	
-		self._dialog = Gtk.Dialog("End of playback", None, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT, Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT))
+		self._dialog = Gtk.Dialog(_("End of playback"), None, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT, Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT))
 	
 	"""
 		Show dialog, start timer and wait for timeout or user response.
@@ -128,26 +132,13 @@ class TimeDialog():
 		self._dialog.destroy()
 		self._dialogEnd.release()
 		return self._dialogResponse
-
-"""
-		if self._dialogResponse == Gtk.ResponseType.REJECT:
-			self._dialogEnd.release()
-			return Gtk.ResponseType.REJECT
-		elif self._dialogResponse == Gtk.ResponseType.ACCEPT:
-			self._dialogEnd.release()
-			return Gtk.ResponseType.ACCEPT
-		else:
-			self._dialog.destroy()
-			self._dialogEnd.release()
-			return Gtk.ResponseType.NONE
-"""
 		
 
 """
 Main class for plugin
 """
 class StarterPlugin (GObject.Object, Peas.Activatable):
-	__gtype_name__ = 'StarterPlugin'
+	__gtype_name__ = 'poweroffplugin'
 	object = GObject.property (type = GObject.Object)
 
 	def __init__ (self):
@@ -162,7 +153,7 @@ class StarterPlugin (GObject.Object, Peas.Activatable):
 		self._totem = self.object
 		self._baconWidget = self._totem.get_video_widget()
 		self._baconWidget.connect('eos', self.eosHandler)
-		self._totem.add_sidebar_page("poweroffSidePage", "After playback stops", self._sidePanel.getWidget())
+		self._totem.add_sidebar_page("poweroffSidePage", _("After playback stops"), self._sidePanel.getWidget())
 
 	"""
 	Procedure called when plugin is deactivated in Totem
@@ -180,24 +171,23 @@ class StarterPlugin (GObject.Object, Peas.Activatable):
 		if self._totem.get_playlist_pos() == 0 :
 			action = self._sidePanel.getSelectedAction()
 			if action == SUSPEND:
-				text =  "suspend\n"
+				text =  _("suspend")+"\n"
 				command = 'dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend'
 			elif action == TURNOFF:
-				text =  "power off\n"
+				text =  _("power off")+"\n"
 				command = 'dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop'
 			elif action == NOTHING:
-				text = "do nothing\n"
+				text = _("do nothing")+"\n"
 				command = ''
 				return
 			else:
-				text =  "error\n"
+				text =  _("error")+"\n"
 				return
 
 			timeDialog = TimeDialog(text, 30)
 			response = timeDialog.run()
 			if (response == Gtk.ResponseType.NONE or response == Gtk.ResponseType.ACCEPT):
-				print "Computer is going to "+text
-				"""				
+
 				try:
 					pid = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).pid
 				except OSError as e:
@@ -206,7 +196,6 @@ class StarterPlugin (GObject.Object, Peas.Activatable):
 					print >>sys.stderr, "Command returned unexpected value:", e
 				except ValueError as e:
 					print >>sys.stderr, "Error in plugin - bad argument for subprocess.Popen:", e
-				"""
-			
+		
 			
 
