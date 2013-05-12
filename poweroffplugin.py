@@ -22,9 +22,8 @@
 
 """
 Power off totem plugin (https://sourceforge.net/p/poweroffplugin/).
-"""
 
-"""
+
 ---------------------------------------------------------          
 |                    !!!!!!CAUTION!!!!!!                |
 |    This version is suitable for Totem 3.x	            |
@@ -32,12 +31,12 @@ Power off totem plugin (https://sourceforge.net/p/poweroffplugin/).
 |    https://sourceforge.net/p/poweroffplugin/          |
 ---------------------------------------------------------
 """
+
 from gi.repository import Gtk
 from gi.repository import GObject
 from gi.repository import Peas
 from gi.repository import Totem
 import threading
-import time
 import subprocess
 
 """
@@ -94,7 +93,8 @@ class TimeDialog():
 	def __init__(self, text, time):
 		self._label = Gtk.Label("Computer is going to "+text+" in "+str(time)+" seconds.")
 		self._timerThread = threading.Thread(target=self.timer, args=(time, 0))
-		self._responseLock = threading.Lock()
+		self._dialogLock = threading.Lock()
+		self._dialogEnd = threading.Condition(self._dialogLock)
 		self._dialogResponse = Gtk.ResponseType.NONE	
 		self._dialog = Gtk.Dialog("End of playback", None, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT, Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT))
 	
@@ -106,13 +106,13 @@ class TimeDialog():
 		self._timerThread.start()
 		self._dialog.vbox.pack_start(self._label, expand=True, fill=True, padding=0)
 		self._label.show()
+
 		response = self._dialog.run()
-		self._responseLock.acquire()
-		try:
-			self._dialogResponse = response
-		finally:
-			self._responseLock.release()
+		self._dialogResponse = response
 		self._dialog.destroy()
+		self._dialogEnd.acquire()
+		self._dialogEnd.notify()
+		self._dialogEnd.release()
 		return self._dialogResponse		
 
 	"""
@@ -120,19 +120,27 @@ class TimeDialog():
 		Busy waiting until timeout, checking response.
 	"""	
 	def timer(self, delay, cmd):
-		start = time.time();
-		while time.time()-start < delay :
-			self._responseLock.acquire()
-			if self._dialogResponse == Gtk.ResponseType.REJECT:
-				self._responseLock.release()
-				return Gtk.ResponseType.REJECT
-			elif self._dialogResponse == Gtk.ResponseType.ACCEPT:
-				self._responseLock.release()
-				return Gtk.ResponseType.ACCEPT
-			self._responseLock.release()		
-			continue
+		dialogNotEnded = 1;
+		self._dialogEnd.acquire()
+		while dialogNotEnded :
+			self._dialogEnd.wait(delay)
+			dialogNotEnded = 0
 		self._dialog.destroy()
-		return Gtk.ResponseType.NONE
+		self._dialogEnd.release()
+		return self._dialogResponse
+
+"""
+		if self._dialogResponse == Gtk.ResponseType.REJECT:
+			self._dialogEnd.release()
+			return Gtk.ResponseType.REJECT
+		elif self._dialogResponse == Gtk.ResponseType.ACCEPT:
+			self._dialogEnd.release()
+			return Gtk.ResponseType.ACCEPT
+		else:
+			self._dialog.destroy()
+			self._dialogEnd.release()
+			return Gtk.ResponseType.NONE
+"""
 		
 
 """
@@ -189,6 +197,7 @@ class StarterPlugin (GObject.Object, Peas.Activatable):
 			response = timeDialog.run()
 			if (response == Gtk.ResponseType.NONE or response == Gtk.ResponseType.ACCEPT):
 				print "Computer is going to "+text
+				"""				
 				try:
 					pid = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).pid
 				except OSError as e:
@@ -197,6 +206,7 @@ class StarterPlugin (GObject.Object, Peas.Activatable):
 					print >>sys.stderr, "Command returned unexpected value:", e
 				except ValueError as e:
 					print >>sys.stderr, "Error in plugin - bad argument for subprocess.Popen:", e
+				"""
 			
 			
 
