@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installation script for poweroff plugin for Totem 3.x media player.
+# Installation script for poweroff plugin for Totem 3.8.x media player.
 # Run with sudo
 answered=false
 pth=~/.local/share/totem/plugins/

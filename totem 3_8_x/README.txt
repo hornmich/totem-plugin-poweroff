@@ -1,9 +1,9 @@
-                   Poweroffplugin for Totem 3.x
+                   Poweroffplugin for Totem 3.8.x
 
   What is it?
   -----------
 
-  The Poweroffplugin is plugin for Totem 3.x player, used in Gnome Shell.
+  The Poweroffplugin is plugin for Totem 3.8.x player, used in Gnome Shell.
   It provides an ability to suspend or turn computer off after end of
   stream is reached.
 
