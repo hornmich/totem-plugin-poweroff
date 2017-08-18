@@ -6,7 +6,8 @@ The plugin adds to the player the possibility of suspending or turning off the c
 The plugin has been tested on Ubuntu and Linux Mint distribution on the following versions of players:
 * Totem 2.3
 * Totem 3.0
-* Totem 3.8
+* Totem 3.8 on Linux Mint 17
+* Xplayer 1.4.3 on Linux Mint 18.2
 
 The plugin might be compatible with other versions, but Totem and all its components are under heavy development and the plugin API is changing all the time, so the compatibility is not guaranteed for all combinations of libraries and players.
 
@@ -19,7 +20,11 @@ There is an 'install' script at the root of the repository, that can be used for
 
 Change to the directory where you have extracted the plugin and run the instllation script
 
-    sudo ./install
+    sudo ./install.sh totem
+    
+or
+ 
+    sudo ./install.sh xplayer
     
 The script is properly installed if the script does not report any error.
 
