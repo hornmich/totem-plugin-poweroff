@@ -13,6 +13,11 @@ The plugin might be compatible with other versions, but Totem and all its compon
 
 If the plugin does not work for you, please send me the output from the command line and version of your player to allow me improve the plugin.
 
+## Where to get the plugin
+The best is to look at the !Releases! page and download the correct version for your player. On this page there are released and tested versions for some major Totem and Xplayer version, distributed in Ubuntu and Linux Mint distributions.
+
+You are free to try another versions and to post Pull requests for them :)
+
 ## Installation
 There are two ways for installation:
 ### Script
