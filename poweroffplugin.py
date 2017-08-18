@@ -160,7 +160,7 @@ class StarterPlugin (GObject.Object, Peas.Activatable):
 			action = self._sidePanel.getSelectedAction()
 			if action == SUSPEND:
 				text =  _("suspend")+"\n"
-				command = 'dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend'
+				command = 'dbus-send --system --print-reply --dest="org.freedesktop.login1" /org/freedesktop/login1 org.freedesktop.login1.Manager.Suspend boolean:true'
 			elif action == TURNOFF:
 				text =  _("power off")+"\n"
 				command = 'dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop'
