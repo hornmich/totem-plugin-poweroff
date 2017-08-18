@@ -1,15 +1,28 @@
 #!/bin/bash
-# Installation script for poweroff plugin for Totem 3.8.x media player.
+# Installation script for poweroff plugin for Totem and Xplayer media player.
 # Run with sudo
+
+if [ $# -ne 1 ] ; then
+    echo $0: usage: ./install.sh totem/xplayer
+    exit 1
+fi
+
+target=$1
+
+if [[ "$target" != "totem" && "$target" != "xplayer" ]] ; then
+    echo Invalit target $target. Select totem or xplayer.
+    exit 1
+fi
+
 answered=false
-pth=~/.local/share/totem/plugins/
+pth=~/.local/share/$target/plugins/
 while !($answered); do
     read -p "Do you wish to install this program for all users [y/n]?" yn
     case $yn in
-        [Yy]* ) pth=/usr/lib/totem/plugins/poweroffplugin
+        [Yy]* ) pth=/usr/lib/$target/plugins/poweroffplugin
 				answered=true
 				;;
-        [Nn]* ) pth=~/.local/share/totem/plugins/poweroffplugin
+        [Nn]* ) pth=~/.local/share/$target/plugins/poweroffplugin
 				answered=true
 				;;
         * ) echo "Please answer yes or no.";;
