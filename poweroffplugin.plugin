@@ -1,11 +1,11 @@
 [Plugin]
-Loader=python
+Loader=python3
 Module=poweroffplugin
 IAge=1
 Name=Power Off Plugin
 Name[cs]=Vypínací plugin
 Description=Plugin for automatic power off or suspend computer after the end of playback.
 Description[cs]=Plugin pro automatické vypnutí nebo uspání počítače na konci přehrávání.
-Authors=Michal Horn <hornmich@fel.cvut.cz
-Copyright=Copyright © 2013 Michal Horn
-Website=https://sourceforge.net/p/poweroffplugin
+Authors=Michal Horn
+Copyright=Copyright © 2017 Michal Horn
+Website=https://github.com/hornmich/totem-plugin-poweroff
