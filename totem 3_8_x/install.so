@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installation script for poweroff plugin for Totem 3.x media player.
+# Installation script for poweroff plugin for Totem 3.8.x media player.
 # Run with sudo
 answered=false
 pth=~/.local/share/totem/plugins/
@@ -16,24 +16,26 @@ while !($answered); do
     esac
 done
 
-echo "mkdir "$pth
+echo "Making directory at "$pth
 mkdir -p $pth
 if [ $? -ne 0 ] ; then
     echo "ERROR: Making directory "$pth" failed!"
 	exit 1
 fi
 
-echo "copying to"$pth
+echo "Copying poweroffplugin.py to "$pth
 cp -f poweroffplugin.py $pth
 if [ $? -ne 0 ] ; then
     echo "ERROR: Copy of powerplugin.py to "$pth" failed!"
 	exit 1
 fi
+echo "Copying poweroffplugin.plugin to "$pth
 cp -f poweroffplugin.plugin $pth
 if [ $? -ne 0 ] ; then
     echo "ERROR: Copy of powerplugin.plugin to "$pth" failed!"
 	exit 1
 fi
+echo "Copying language files to /usr/share/locale"
 cp -r -f languages/* /usr/share/locale
 if [ $? -ne 0 ] ; then
     echo "ERROR: Copy of language files to /usr/share/locale failed!"

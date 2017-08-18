@@ -26,7 +26,7 @@ Power off totem plugin (https://sourceforge.net/p/poweroffplugin/).
 
 ---------------------------------------------------------          
 |                    !!!!!!CAUTION!!!!!!                |
-|    This version is suitable for Totem 3.x	            |
+|    This version is suitable for Totem 3.8.x	            |
 |    For Totem 2.x download apropriate version from     |
 |    https://sourceforge.net/p/poweroffplugin/          |
 ---------------------------------------------------------
