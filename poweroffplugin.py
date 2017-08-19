@@ -36,7 +36,7 @@ TURNOFF = 1
 NOTHING = 2
 
 t = gettext.translation('poweroffplugin', '/usr/share/locale')
-_ = t.lgettext
+_ = t.gettext
 
 """
 	Class for maintaining Totem side panel for this plugin.
